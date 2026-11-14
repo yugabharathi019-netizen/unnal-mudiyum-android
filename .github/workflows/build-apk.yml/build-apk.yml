@@ -21,6 +21,11 @@ jobs:
         with:
           distribution: temurin
           java-version: "17"
+         uses: Set up Gradle
+       - name: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.7"
+          
 
       - name: Extract Android project
         run: |
