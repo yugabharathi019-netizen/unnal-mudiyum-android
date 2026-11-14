@@ -1,44 +1,44 @@
-
 name: Build UNNAL MUDIYUM APK
 
 on:
   push:
-    branches: [main]
+    branches: [ "main" ]
   workflow_dispatch:
-
-permissions:
-  contents: read
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout Code
         uses: actions/checkout@v4
 
       - name: Set up Java
         uses: actions/setup-java@v4
         with:
-          distribution: temurin
-          java-version: "17"
-         uses: Set up Gradle
-       - name: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: "8.7"
-          
+          distribution: 'temurin'
+          java-version: '17'
 
-      - name: Extract Android project
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-version: '8.7'
+
+      - name: Extract zip
         run: |
-          unzip -q unnal-mudiyum-github-ready.zip -d extracted
+          find . -name "*.zip" -exec unzip -q {} +
 
       - name: Build APK
-        working-directory: extracted/unnal-mudiyum-android
         run: |
-          gradle --no-daemon :app:assembleDebug
+          find . -maxdepth 3 -name "build.gradle*" -exec dirname {} + | while read dir; do
+            if [ -f "$dir/gradlew" ]; then
+              cd "$dir" && ./gradlew assembleDebug
+              break
+            fi
+          done
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: unnal-mudiyum-debug-apk
-          path: extracted/unnal-mudiyum-android/app/build/outputs/apk/debug/app-debug.apk
-          
+          name: app-debug
+          path: **/app-debug.apk
+
